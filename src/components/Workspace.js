@@ -32,7 +32,7 @@ export default class Workspace extends React.Component {
                     </div>
                 </div>
             )
-        } else{
+        } else{ //Professor McKenna's code had a green background when he had no current list
             return (
                 <div id="top5-workspace">
                     <div id="workspace-edit">

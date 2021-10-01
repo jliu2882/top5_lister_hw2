@@ -24,7 +24,6 @@ class App extends React.Component {
         // SETUP THE INITIAL STATE
         this.state = {
             currentList : null,
-            deleteCandidate : null,
             sessionData : loadedSessionData
         }
     }
@@ -117,19 +116,22 @@ class App extends React.Component {
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
     closeCurrentList = () => {
-        this.setState(prevState => ({
-            currentList: null,
-            listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
-            sessionData: this.state.sessionData
-        }), () => {
-            // ANY AFTER EFFECTS?
-        });
+        if(this.state.currentList){ //Just in case closing leads to bugs if there are no list
+            this.setState(prevState => ({
+                currentList: null,
+                listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
+                sessionData: this.state.sessionData
+            }), () => {
+                // ANY AFTER EFFECTS?
+            });
+        } else{ //idk ill leave it here
+            
+        }
     }
     deleteList = (keyNamePair) => {
         this.setState(prevState => ({
             currentList: this.state.currentList,
-            deleteCandidate: keyNamePair,
-            listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
+            listKeyPairMarkedForDeletion : keyNamePair,
             sessionData: this.state.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
@@ -156,7 +158,7 @@ class App extends React.Component {
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
-                    closeCallback={this.closeCurrentList} />
+                    closeListCallback={this.closeCurrentList} />
                 <Sidebar
                     heading='Your Lists'
                     currentList={this.state.currentList}
@@ -171,7 +173,7 @@ class App extends React.Component {
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
-                    keyNamePair={this.state.deleteCandidate}
+                    keyNamePair={this.state.listKeyPairMarkedForDeletion}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
                 />
             </div>
