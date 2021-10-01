@@ -24,6 +24,7 @@ class App extends React.Component {
         // SETUP THE INITIAL STATE
         this.state = {
             currentList : null,
+            deleteCandidate : null,
             sessionData : loadedSessionData
         }
     }
@@ -48,7 +49,7 @@ class App extends React.Component {
 
         // MAKE THE KEY,NAME OBJECT SO WE CAN KEEP IT IN OUR
         // SESSION DATA SO IT WILL BE IN OUR LIST OF LISTS
-        let newKeyNamePair = { "key": newKey, "name": newName };
+        let newKeyNamePair = { "key": ""+newKey, "name": newName };
         let updatedPairs = [...this.state.sessionData.keyNamePairs, newKeyNamePair];
         this.sortKeyNamePairsByName(updatedPairs);
 
@@ -124,7 +125,15 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = () => {
+    deleteList = (keyNamePair) => {
+        this.setState(prevState => ({
+            currentList: this.state.currentList,
+            deleteCandidate: keyNamePair,
+            listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
+            sessionData: this.state.sessionData
+        }), () => {
+            // ANY AFTER EFFECTS?
+        });
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
@@ -162,6 +171,7 @@ class App extends React.Component {
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
+                    keyNamePair={this.state.deleteCandidate}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
                 />
             </div>
