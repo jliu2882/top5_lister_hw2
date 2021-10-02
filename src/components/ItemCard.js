@@ -45,6 +45,20 @@ export default class ItemCard extends React.Component {
         });
     }
 
+    onDragOver =(ev) =>{
+        ev.preventDefault();
+    }
+    onDragStart =(ev, id) =>{
+        ev.dataTransfer.setData("id",id);
+    }
+    onDrop =(ev,id)=>{
+        id=""+id;
+        let id2 = ""+ev.dataTransfer.getData("id");
+        if(id!==id2){
+            this.props.swapItemCallback(id2,id);
+        }
+    }
+
     render() {
         const { id, name } = this.props;
         if (this.state.editActive) {
@@ -63,6 +77,10 @@ export default class ItemCard extends React.Component {
         else {
             return (
                 <div
+                    draggable
+                    onDragOver={(e)=>this.onDragOver(e)}
+                    onDragStart={(e)=>this.onDragStart(e,""+id)}
+                    onDrop={(e)=>this.onDrop(e, id)}
                     onClick={this.handleClick}
                     className="top5-item"
                     id={id}>

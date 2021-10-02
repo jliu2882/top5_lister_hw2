@@ -106,22 +106,24 @@ class App extends React.Component {
         });
     }
     renameItem = (key, newName) => {
-        
+        let list = this.state.currentList;
+        list.items[key] = newName;
         this.setState(prevState => ({
-            currentList: prevState.currentList,
+            currentList: list,
             sessionData: {
                 nextKey: prevState.sessionData.nextKey,
                 counter: prevState.sessionData.counter,
                 keyNamePairs: prevState.sessionData.keyNamePairs
             }
         }), () => {
-            this.state.currentList.items[key] = newName;
+            //this.state.currentList.items[key] = newName;
             this.db.mutationUpdateList(this.state.currentList);
             this.loadList(this.state.currentList.key);
             // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
         });
     }
+    
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
         let newCurrentList = this.db.queryGetList(key);
@@ -186,6 +188,25 @@ class App extends React.Component {
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
         this.showDeleteListModal();
     }
+    swapItem = (oldIndex, newIndex) => {
+        console.log("dropping " +this.state.currentList.items[oldIndex] + " to new index " + this.state.currentList.items[newIndex]);
+        let list = this.state.currentList;
+        list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]);
+        this.setState(prevState => ({
+            currentList: list,
+            sessionData: {
+                nextKey: prevState.sessionData.nextKey,
+                counter: prevState.sessionData.counter,
+                keyNamePairs: prevState.sessionData.keyNamePairs
+            }
+        }), () => {
+            //this.state.currentList.items[key] = newName;
+            this.db.mutationUpdateList(this.state.currentList);
+            this.loadList(this.state.currentList.key);
+            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // THE TRANSACTION STACK IS CLEARED
+        });
+    }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
     // TO SEE IF THEY REALLY WANT TO DELETE THE LIST
     showDeleteListModal() {
@@ -214,7 +235,8 @@ class App extends React.Component {
                 />
                 <Workspace
                     currentList={this.state.currentList}
-                    renameItemCallback={this.renameItem} />
+                    renameItemCallback={this.renameItem}
+                    swapItemCallback={this.swapItem} />
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal

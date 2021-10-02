@@ -23,6 +23,7 @@ export default class Workspace extends React.Component {
                                         id={index}
                                         name={item}
                                         renameItemCallback={this.props.renameItemCallback}
+                                        swapItemCallback={this.props.swapItemCallback}
                                     />
                                 ))
                             }
