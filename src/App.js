@@ -207,6 +207,15 @@ class App extends React.Component {
             // THE TRANSACTION STACK IS CLEARED
         });
     }
+    /*
+    highlightItem = (index) =>{
+        this.setState(prevState => ({
+            highlightIndex: index,
+        }), () => {
+            // ANY AFTER EFFECTS?
+        });
+    }
+    */
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
     // TO SEE IF THEY REALLY WANT TO DELETE THE LIST
     showDeleteListModal() {
@@ -232,11 +241,14 @@ class App extends React.Component {
                     deleteListCallback={this.deleteList}
                     loadListCallback={this.loadList}
                     renameListCallback={this.renameList}
-                />
+                /> 
                 <Workspace
                     currentList={this.state.currentList}
                     renameItemCallback={this.renameItem}
-                    swapItemCallback={this.swapItem} />
+                    swapItemCallback={this.swapItem} //pass index from highlightitem to here
+                    //highlightItemCallback={this.highlightItem}
+                    //highlightIndex={this.state.highlightIndex}
+                    /> 
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal

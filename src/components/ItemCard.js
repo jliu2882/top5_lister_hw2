@@ -45,8 +45,15 @@ export default class ItemCard extends React.Component {
         });
     }
 
-    onDragOver =(ev) =>{
+    onDragOver =(ev,id) =>{
         ev.preventDefault();
+        ev.target.className = "top5-item-dragged-to";
+        //this.props.highlightItemCallback(id);
+    }
+    onDragLeave =(ev,id) =>{
+        ev.preventDefault();
+        ev.target.className = "top5-item";
+        //this.props.highlightItemCallback(id);
     }
     onDragStart =(ev, id) =>{
         ev.dataTransfer.setData("id",id);
@@ -54,18 +61,22 @@ export default class ItemCard extends React.Component {
     onDrop =(ev,id)=>{
         id=""+id;
         let id2 = ""+ev.dataTransfer.getData("id");
+        ev.target.className = "top5-item";
+        //this.props.highlightItemCallback(null);
         if(id!==id2){
             this.props.swapItemCallback(id2,id);
         }
     }
 
     render() {
+        //we are passed highligh t/f so if t then change css or smth
         const { id, name } = this.props;
         if (this.state.editActive) {
             return (
                 <input
                     autoFocus
                     className="top5-item"
+                   // className={highlight?"top5-item-dragged-to":"top5-item"}
                     id={id}
                     type='text'
                     onKeyPress={this.handleKeyPress}
@@ -78,11 +89,13 @@ export default class ItemCard extends React.Component {
             return (
                 <div
                     draggable
-                    onDragOver={(e)=>this.onDragOver(e)}
+                    onDragOver={(e)=>this.onDragOver(e,""+id)}
+                    onDragLeave={(e)=>this.onDragLeave(e,""+id)}
                     onDragStart={(e)=>this.onDragStart(e,""+id)}
                     onDrop={(e)=>this.onDrop(e, id)}
                     onClick={this.handleClick}
                     className="top5-item"
+                   // className={highlight?"top5-item-dragged-to":"top5-item"}
                     id={id}>
                     {name}
                 </div>

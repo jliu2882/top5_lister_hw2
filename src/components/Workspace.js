@@ -2,6 +2,7 @@ import React from "react";
 import ItemCard from "./ItemCard";
 
 export default class Workspace extends React.Component {
+    //we are passed highlightIndex of which to highlight so pass-> 
     render() {
         const { currentList } = this.props;
         if (currentList) {
@@ -22,8 +23,10 @@ export default class Workspace extends React.Component {
                                         key={index}
                                         id={index}
                                         name={item}
+                                        //highlight = {((""+index)===this.props.highlightIndex)}
                                         renameItemCallback={this.props.renameItemCallback}
                                         swapItemCallback={this.props.swapItemCallback}
+                                        highlightItemCallback={this.props.highlightItemCallback}
                                     />
                                 ))
                             }
