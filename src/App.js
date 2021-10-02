@@ -36,7 +36,7 @@ class App extends React.Component {
     // THIS FUNCTION BEGINS THE PROCESS OF CREATING A NEW LIST
     createNewList = () => {
         // FIRST FIGURE OUT WHAT THE NEW LIST'S KEY AND NAME WILL BE
-        let newKey = this.state.sessionData.nextKey;
+        let newKey = ""+this.state.sessionData.nextKey;
         let newName = "Untitled" + newKey;
 
         // MAKE THE NEW LIST
@@ -48,7 +48,7 @@ class App extends React.Component {
 
         // MAKE THE KEY,NAME OBJECT SO WE CAN KEEP IT IN OUR
         // SESSION DATA SO IT WILL BE IN OUR LIST OF LISTS
-        let newKeyNamePair = { "key": ""+newKey, "name": newName };
+        let newKeyNamePair = { "key": newKey, "name": newName };
         let updatedPairs = [...this.state.sessionData.keyNamePairs, newKeyNamePair];
         this.sortKeyNamePairsByName(updatedPairs);
 
@@ -69,6 +69,7 @@ class App extends React.Component {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
             this.db.mutationCreateList(newList);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
     renameList = (key, newName) => {
@@ -128,6 +129,32 @@ class App extends React.Component {
             
         }
     }
+    confirmedDeleteList = () =>{
+        let newKeyNamePairs = [...this.state.sessionData.keyNamePairs];
+        for (let i = 0; i < newKeyNamePairs.length; i++) {
+            let pair = newKeyNamePairs[i];
+            if (this.state.listKeyPairMarkedForDeletion.key === pair.key) {
+                newKeyNamePairs.splice(i, 1);
+            }
+        }
+        this.sortKeyNamePairsByName(newKeyNamePairs);
+
+        this.setState(prevState => ({
+            currentList: this.state.listKeyPairMarkedForDeletion === this.state.currentList ? null : this.state.currentList, //test
+            listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
+            sessionData: {
+                nextKey: prevState.sessionData.nextKey, //delete doesnt make new list
+                counter: prevState.sessionData.counter,
+                keyNamePairs: newKeyNamePairs
+            }
+        }), () => {
+            // PUTTING THIS NEW LIST IN PERMANENT STORAGE
+            // IS AN AFTER EFFECT
+            this.db.mutationDeleteList(this.state.listKeyPairMarkedForDeletion);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+        this.hideDeleteListModal();
+    }
     deleteList = (keyNamePair) => {
         this.setState(prevState => ({
             currentList: this.state.currentList,
@@ -174,6 +201,7 @@ class App extends React.Component {
                     currentList={this.state.currentList} />
                 <DeleteModal
                     keyNamePair={this.state.listKeyPairMarkedForDeletion}
+                    confirmedDeleteCallback={this.confirmedDeleteList}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
                 />
             </div>
