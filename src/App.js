@@ -120,6 +120,9 @@ class App extends React.Component {
     renameList = (key, newName) => {
         let newKeyNamePairs = [...this.state.sessionData.keyNamePairs];
         // NOW GO THROUGH THE ARRAY AND FIND THE ONE TO RENAME
+        if(newName===""){
+            newName = "Untitled"+key;
+        }
         for (let i = 0; i < newKeyNamePairs.length; i++) {
             let pair = newKeyNamePairs[i];
             if (pair.key === key) {
@@ -144,7 +147,7 @@ class App extends React.Component {
         }), () => {
             // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
-            this.tps.clearAllTransactions();
+            //this.tps.clearAllTransactions(); //piazza said not to clear on rename
             let list = this.db.queryGetList(key);
             list.name = newName;
             this.db.mutationUpdateList(list);
@@ -216,7 +219,7 @@ class App extends React.Component {
             currentList: newCurrentList,
             sessionData: prevState.sessionData
         }), () => {
-            // ANY AFTER EFFECTS? TODO?
+            // ANY AFTER EFFECTS? according to piazza, none
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
@@ -228,7 +231,7 @@ class App extends React.Component {
                 sessionData: this.state.sessionData
             }), () => {
                 // ANY AFTER EFFECTS?
-                this.tps.clearAllTransactions();
+                this.tps.clearAllTransactions(); //close the current list
             });
         } else{ //idk ill leave it here
             
@@ -244,8 +247,9 @@ class App extends React.Component {
         }
         this.sortKeyNamePairsByName(newKeyNamePairs);
         if(this.state.currentList!==null){
+            let deletingCurrent = this.state.listKeyPairMarkedForDeletion.key === this.state.currentList.key;
             this.setState(prevState => ({
-                currentList: this.state.listKeyPairMarkedForDeletion.key === this.state.currentList.key ? null : this.state.currentList, //test
+                currentList: deletingCurrent ? null : this.state.currentList, //test
                 listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
                 sessionData: {
                     nextKey: prevState.sessionData.nextKey, //delete doesnt make new list
@@ -255,6 +259,9 @@ class App extends React.Component {
             }), () => {
                 // PUTTING THIS NEW LIST IN PERMANENT STORAGE
                 // IS AN AFTER EFFECT
+                if(deletingCurrent){
+                    this.tps.clearAllTransactions(); //deleting current list
+                }
                 this.db.mutationDeleteList(this.state.listKeyPairMarkedForDeletion);
                 this.db.mutationUpdateSessionData(this.state.sessionData);
             });
@@ -312,11 +319,15 @@ class App extends React.Component {
     }
 
     render() {
+        let canUndo = this.tps.hasTransactionToUndo();
+        let canRedo = this.tps.hasTransactionToRedo();
         return (
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
                     currentList={this.state.currentList}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
                     undoCallback={this.undo}
                     redoCallback={this.redo}
                     closeListCallback={this.closeCurrentList} />
