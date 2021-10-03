@@ -142,8 +142,9 @@ class App extends React.Component {
                 keyNamePairs: newKeyNamePairs
             }
         }), () => {
-            // TODO AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
+            this.tps.clearAllTransactions();
             let list = this.db.queryGetList(key);
             list.name = newName;
             this.db.mutationUpdateList(list);
@@ -166,21 +167,21 @@ class App extends React.Component {
     }
     changeItem(key, newName) {
         let list = this.state.currentList;
-        list.items[key] = newName;
-        this.setState(prevState => ({
-            currentList: list,
-            sessionData: {
-                nextKey: prevState.sessionData.nextKey,
-                counter: prevState.sessionData.counter,
-                keyNamePairs: prevState.sessionData.keyNamePairs
-            }
-        }), () => {
-            //this.state.currentList.items[key] = newName;
-            this.db.mutationUpdateList(this.state.currentList);
-            this.loadList(this.state.currentList.key);
-            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
-            // THE TRANSACTION STACK IS CLEARED
-        });
+        if(list!==null){
+            list.items[key] = newName;
+            this.setState(prevState => ({
+                currentList: list,
+                sessionData: {
+                    nextKey: prevState.sessionData.nextKey,
+                    counter: prevState.sessionData.counter,
+                    keyNamePairs: prevState.sessionData.keyNamePairs
+                }
+            }), () => {
+                //this.state.currentList.items[key] = newName;
+                this.db.mutationUpdateList(this.state.currentList);
+                this.loadList(this.state.currentList.key);
+            });
+        }
     }
 
     swapItem = (oldIndex, newIndex) => {
@@ -190,22 +191,22 @@ class App extends React.Component {
     }
     moveItem(oldIndex, newIndex){
         let list = this.state.currentList;
-        list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]); //set to own function
-        //addmoveitemtranstiaonc
-        this.setState(prevState => ({
-            currentList: list,
-            sessionData: {
-                nextKey: prevState.sessionData.nextKey,
-                counter: prevState.sessionData.counter,
-                keyNamePairs: prevState.sessionData.keyNamePairs
-            }
-        }), () => {
-            //this.state.currentList.items[key] = newName;
-            this.db.mutationUpdateList(this.state.currentList);
-            this.loadList(this.state.currentList.key);
-            // TODO AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
-            // THE TRANSACTION STACK IS CLEARED
-        });
+        if(list!==null){
+            list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]); //set to own function
+            //addmoveitemtranstiaonc
+            this.setState(prevState => ({
+                currentList: list,
+                sessionData: {
+                    nextKey: prevState.sessionData.nextKey,
+                    counter: prevState.sessionData.counter,
+                    keyNamePairs: prevState.sessionData.keyNamePairs
+                }
+            }), () => {
+                //this.state.currentList.items[key] = newName;
+                this.db.mutationUpdateList(this.state.currentList);
+                this.loadList(this.state.currentList.key);
+            });
+        }
     }
     
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
@@ -226,7 +227,8 @@ class App extends React.Component {
                 listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
                 sessionData: this.state.sessionData
             }), () => {
-                // ANY AFTER EFFECTS? TODO?
+                // ANY AFTER EFFECTS?
+                this.tps.clearAllTransactions();
             });
         } else{ //idk ill leave it here
             
@@ -280,7 +282,7 @@ class App extends React.Component {
             listKeyPairMarkedForDeletion : keyNamePair,
             sessionData: this.state.sessionData
         }), () => {
-            // ANY AFTER EFFECTS? TODO?
+            // ANY AFTER EFFECTS?
         });
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
