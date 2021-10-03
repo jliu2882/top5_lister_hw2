@@ -33,6 +33,32 @@ class App extends React.Component { //TODO foolproof design and saving list afte
             sessionData : loadedSessionData
         }
     }
+    
+    componentDidMount() {
+        window.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 'z') {
+                this.undo(); //why cant do that
+            }
+        });
+        window.addEventListener('keydown', (event) =>  {
+            if (event.ctrlKey && event.key === 'y') {
+                this.redo();
+            }
+        });
+    }
+    componentWillUnmount() {
+        window.removeEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 'z') {
+                this.undo(); //why cant do that
+            }
+        });
+        window.removeEventListener('keydown', (event) =>  {
+            if (event.ctrlKey && event.key === 'y') {
+                this.redo();
+            }
+        });
+    }
+    
     undo = () => {
         if (this.tps.hasTransactionToUndo()) {
             this.tps.undoTransaction();

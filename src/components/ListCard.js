@@ -47,7 +47,7 @@ export default class ListCard extends React.Component {
         this.props.renameListCallback(key, textValue);
         this.handleToggleEdit();
     }
-
+    
     render() {
         const { keyNamePair, selected } = this.props;
 
