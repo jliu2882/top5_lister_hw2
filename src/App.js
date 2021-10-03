@@ -14,7 +14,7 @@ import jsTPS from "./common/jsTPS.js";
 import ChangeItem_Transaction from "./transactions/ChangeItem_Transaction.js";
 import MoveItem_Transaction from "./transactions/MoveItem_Transaction.js";
 
-class App extends React.Component { //TODO foolproof design and saving list after every change(for undo/redo)
+class App extends React.Component {
     constructor(props) {
         super(props);
 
@@ -46,7 +46,7 @@ class App extends React.Component { //TODO foolproof design and saving list afte
             }
         });
     }
-    componentWillUnmount() {
+    componentWillUnmount() { //i think it's unnecessary since app unmount = exit page, but for completeness
         window.removeEventListener('keydown', (event) => {
             if (event.ctrlKey && event.key === 'z') {
                 this.undo(); //why cant do that
@@ -149,7 +149,7 @@ class App extends React.Component { //TODO foolproof design and saving list afte
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
-    renameItem = (key, newName) => { //TODO changeitem
+    renameItem = (key, newName) => {
         if(newName === ""){
             newName =  "?";
         }
@@ -182,7 +182,7 @@ class App extends React.Component { //TODO foolproof design and saving list afte
         });
     }
 
-    swapItem = (oldIndex, newIndex) => { //TODO moveitem
+    swapItem = (oldIndex, newIndex) => {
         //console.log("dropping " +this.state.currentList.items[oldIndex] + " to new index " + this.state.currentList.items[newIndex]);
         let transaction = new MoveItem_Transaction(this, oldIndex, newIndex);
         this.tps.addTransaction(transaction);
@@ -231,7 +231,7 @@ class App extends React.Component { //TODO foolproof design and saving list afte
             
         }
     }
-    confirmedDeleteList = () =>{ //TODO update view if deleting currentList
+    confirmedDeleteList = () =>{
         let newKeyNamePairs = [...this.state.sessionData.keyNamePairs];
         for (let i = 0; i < newKeyNamePairs.length; i++) {
             let pair = newKeyNamePairs[i];
@@ -240,9 +240,9 @@ class App extends React.Component { //TODO foolproof design and saving list afte
             }
         }
         this.sortKeyNamePairsByName(newKeyNamePairs);
-
+        
         this.setState(prevState => ({
-            currentList: this.state.listKeyPairMarkedForDeletion === this.state.currentList ? null : this.state.currentList, //test
+            currentList: this.state.listKeyPairMarkedForDeletion.key === this.state.currentList.key ? null : this.state.currentList, //test
             listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
             sessionData: {
                 nextKey: prevState.sessionData.nextKey, //delete doesnt make new list

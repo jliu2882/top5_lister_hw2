@@ -13,7 +13,7 @@ export default class Sidebar extends React.Component {
         return (
             <div id="top5-sidebar">
                 <div id="sidebar-heading">
-                    <input 
+                    <input //TODO disable button on list open
                         type="button" 
                         id="add-list-button" 
                         onClick={createNewListCallback}
