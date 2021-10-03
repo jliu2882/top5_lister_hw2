@@ -6,18 +6,24 @@ import DBManager from './db/DBManager';
 
 // THESE ARE OUR REACT COMPONENTS
 import DeleteModal from './components/DeleteModal';
-import Banner from './components/Banner.js'
-import Sidebar from './components/Sidebar.js'
+import Banner from './components/Banner.js';
+import Sidebar from './components/Sidebar.js';
 import Workspace from './components/Workspace.js';
-import Statusbar from './components/Statusbar.js'
+import Statusbar from './components/Statusbar.js';
+import jsTPS from "./common/jsTPS.js";
+import ChangeItem_Transaction from "./transactions/ChangeItem_Transaction.js";
+import MoveItem_Transaction from "./transactions/MoveItem_Transaction.js";
 
-class App extends React.Component {
+class App extends React.Component { //TODO foolproof design and saving list after every change(for undo/redo)
     constructor(props) {
         super(props);
 
         // THIS WILL TALK TO LOCAL STORAGE
         this.db = new DBManager();
 
+        // THIS WILL MANAGE OUR TRANSACTIONS
+        this.tps = new jsTPS();
+        
         // GET THE SESSION DATA FROM OUR DATA MANAGER
         let loadedSessionData = this.db.queryGetSessionData();
 
@@ -25,6 +31,18 @@ class App extends React.Component {
         this.state = {
             currentList : null,
             sessionData : loadedSessionData
+        }
+    }
+    undo = () => {
+        if (this.tps.hasTransactionToUndo()) {
+            this.tps.undoTransaction();
+            //this.view.updateToolbarButtons(this);
+        }
+    }
+    redo = () => {
+        if (this.tps.hasTransactionToRedo()) {
+            this.tps.doTransaction();
+            //this.view.updateToolbarButtons(this);
         }
     }
     sortKeyNamePairsByName = (keyNamePairs) => {
@@ -105,9 +123,48 @@ class App extends React.Component {
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
-    renameItem = (key, newName) => {
+    renameItem = (key, newName) => { //TODO changeitem
+        if(newName === ""){
+            newName =  "?";
+        }
+        let oldName = this.state.currentList.items[key];
+        if(newName !== oldName){
+            let transaction = new ChangeItem_Transaction(this, key, oldName, newName);
+            this.tps.addTransaction(transaction);
+            //this.view.updateToolbarButtons(this);
+        } else{
+            this.changeItem(this.key, this.newName);
+            //this.view.updateToolbarButtons(this);
+        }
+    }
+    changeItem(key, newName) {
         let list = this.state.currentList;
         list.items[key] = newName;
+        this.setState(prevState => ({
+            currentList: list,
+            sessionData: {
+                nextKey: prevState.sessionData.nextKey,
+                counter: prevState.sessionData.counter,
+                keyNamePairs: prevState.sessionData.keyNamePairs
+            }
+        }), () => {
+            //this.state.currentList.items[key] = newName;
+            this.db.mutationUpdateList(this.state.currentList);
+            this.loadList(this.state.currentList.key);
+            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // THE TRANSACTION STACK IS CLEARED
+        });
+    }
+
+    swapItem = (oldIndex, newIndex) => { //TODO moveitem
+        //console.log("dropping " +this.state.currentList.items[oldIndex] + " to new index " + this.state.currentList.items[newIndex]);
+        let transaction = new MoveItem_Transaction(this, oldIndex, newIndex);
+        this.tps.addTransaction(transaction);
+    }
+    moveItem(oldIndex, newIndex){
+        let list = this.state.currentList;
+        list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]); //set to own function
+        //addmoveitemtranstiaonc
         this.setState(prevState => ({
             currentList: list,
             sessionData: {
@@ -148,7 +205,7 @@ class App extends React.Component {
             
         }
     }
-    confirmedDeleteList = () =>{
+    confirmedDeleteList = () =>{ //TODO update view if deleting currentList
         let newKeyNamePairs = [...this.state.sessionData.keyNamePairs];
         for (let i = 0; i < newKeyNamePairs.length; i++) {
             let pair = newKeyNamePairs[i];
@@ -188,25 +245,6 @@ class App extends React.Component {
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
         this.showDeleteListModal();
     }
-    swapItem = (oldIndex, newIndex) => {
-        console.log("dropping " +this.state.currentList.items[oldIndex] + " to new index " + this.state.currentList.items[newIndex]);
-        let list = this.state.currentList;
-        list.items.splice(newIndex, 0, list.items.splice(oldIndex, 1)[0]);
-        this.setState(prevState => ({
-            currentList: list,
-            sessionData: {
-                nextKey: prevState.sessionData.nextKey,
-                counter: prevState.sessionData.counter,
-                keyNamePairs: prevState.sessionData.keyNamePairs
-            }
-        }), () => {
-            //this.state.currentList.items[key] = newName;
-            this.db.mutationUpdateList(this.state.currentList);
-            this.loadList(this.state.currentList.key);
-            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
-            // THE TRANSACTION STACK IS CLEARED
-        });
-    }
     /*
     highlightItem = (index) =>{
         this.setState(prevState => ({
@@ -227,11 +265,14 @@ class App extends React.Component {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
     }
+
     render() {
         return (
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
+                    undoCallback={this.undo}
+                    redoCallback={this.redo}
                     closeListCallback={this.closeCurrentList} />
                 <Sidebar
                     heading='Your Lists'

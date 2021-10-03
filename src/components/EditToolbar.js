@@ -2,16 +2,18 @@ import React from "react";
 
 export default class EditToolbar extends React.Component {
     render() {
-        const { closeListCallback } = this.props;
+        const { undoCallback, redoCallback, closeListCallback } = this.props;
         return (
             <div id="edit-toolbar">
                 <div 
-                    id='undo-button' 
+                    id='undo-button'
+                    onClick={undoCallback}
                     className="top5-button">
                         &#x21B6;
                 </div>
                 <div
                     id='redo-button'
+                    onClick={redoCallback}
                     className="top5-button">
                         &#x21B7;
                 </div>
