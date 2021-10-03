@@ -224,6 +224,7 @@ class App extends React.Component {
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
     closeCurrentList = () => {
+        this.tps.clearAllTransactions(); //clear the stack so we might as well clear even if there is no list
         if(this.state.currentList){ //Just in case closing leads to bugs if there are no list
             this.setState(prevState => ({
                 currentList: null,
@@ -231,10 +232,8 @@ class App extends React.Component {
                 sessionData: this.state.sessionData
             }), () => {
                 // ANY AFTER EFFECTS?
-                this.tps.clearAllTransactions(); //close the current list
             });
         } else{ //idk ill leave it here
-            
         }
     }
     confirmedDeleteList = () =>{
