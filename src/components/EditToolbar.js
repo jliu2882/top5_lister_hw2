@@ -2,7 +2,7 @@ import React from "react";
 
 export default class EditToolbar extends React.Component {
     render() {
-        const { undoCallback, redoCallback, closeListCallback } = this.props;
+        const { currentList, undoCallback, redoCallback, closeListCallback } = this.props;
         return (
             <div id="edit-toolbar">
                 <div //TODO disable when nothing to undo
@@ -17,10 +17,10 @@ export default class EditToolbar extends React.Component {
                     className="top5-button">
                         &#x21B7;
                 </div>
-                <div //TODO disable when no currentlist
+                <div
                     id='close-button'
-                    onClick={closeListCallback}
-                    className="top5-button">
+                    onClick={currentList!==null?closeListCallback:null}
+                    className={currentList!==null?"top5-button":"top5-button-disabled"}>
                         &#x24E7;
                 </div>
             </div>

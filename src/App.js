@@ -37,7 +37,7 @@ class App extends React.Component {
     componentDidMount() {
         window.addEventListener('keydown', (event) => {
             if (event.ctrlKey && event.key === 'z') {
-                this.undo(); //why cant do that
+                this.undo(); //why cant do that; arrow function save me yay
             }
         });
         window.addEventListener('keydown', (event) =>  {
@@ -71,6 +71,7 @@ class App extends React.Component {
             //this.view.updateToolbarButtons(this);
         }
     }
+
     sortKeyNamePairsByName = (keyNamePairs) => {
         keyNamePairs.sort((keyPair1, keyPair2) => {
             // GET THE LISTS
@@ -141,7 +142,7 @@ class App extends React.Component {
                 keyNamePairs: newKeyNamePairs
             }
         }), () => {
-            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // TODO AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
             let list = this.db.queryGetList(key);
             list.name = newName;
@@ -202,7 +203,7 @@ class App extends React.Component {
             //this.state.currentList.items[key] = newName;
             this.db.mutationUpdateList(this.state.currentList);
             this.loadList(this.state.currentList.key);
-            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // TODO AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
         });
     }
@@ -214,7 +215,7 @@ class App extends React.Component {
             currentList: newCurrentList,
             sessionData: prevState.sessionData
         }), () => {
-            // ANY AFTER EFFECTS?
+            // ANY AFTER EFFECTS? TODO?
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
@@ -225,7 +226,7 @@ class App extends React.Component {
                 listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
                 sessionData: this.state.sessionData
             }), () => {
-                // ANY AFTER EFFECTS?
+                // ANY AFTER EFFECTS? TODO?
             });
         } else{ //idk ill leave it here
             
@@ -240,21 +241,37 @@ class App extends React.Component {
             }
         }
         this.sortKeyNamePairsByName(newKeyNamePairs);
-        
-        this.setState(prevState => ({
-            currentList: this.state.listKeyPairMarkedForDeletion.key === this.state.currentList.key ? null : this.state.currentList, //test
-            listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
-            sessionData: {
-                nextKey: prevState.sessionData.nextKey, //delete doesnt make new list
-                counter: prevState.sessionData.counter,
-                keyNamePairs: newKeyNamePairs
-            }
-        }), () => {
-            // PUTTING THIS NEW LIST IN PERMANENT STORAGE
-            // IS AN AFTER EFFECT
-            this.db.mutationDeleteList(this.state.listKeyPairMarkedForDeletion);
-            this.db.mutationUpdateSessionData(this.state.sessionData);
-        });
+        if(this.state.currentList!==null){
+            this.setState(prevState => ({
+                currentList: this.state.listKeyPairMarkedForDeletion.key === this.state.currentList.key ? null : this.state.currentList, //test
+                listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
+                sessionData: {
+                    nextKey: prevState.sessionData.nextKey, //delete doesnt make new list
+                    counter: prevState.sessionData.counter,
+                    keyNamePairs: newKeyNamePairs
+                }
+            }), () => {
+                // PUTTING THIS NEW LIST IN PERMANENT STORAGE
+                // IS AN AFTER EFFECT
+                this.db.mutationDeleteList(this.state.listKeyPairMarkedForDeletion);
+                this.db.mutationUpdateSessionData(this.state.sessionData);
+            });
+        } else{ //too lazy to do other solutions, basically if the currentlist is null then just do w.e
+            this.setState(prevState => ({
+                currentList: this.state.currentList, //test
+                listKeyPairMarkedForDeletion : this.state.listKeyPairMarkedForDeletion,
+                sessionData: {
+                    nextKey: prevState.sessionData.nextKey, //delete doesnt make new list
+                    counter: prevState.sessionData.counter,
+                    keyNamePairs: newKeyNamePairs
+                }
+            }), () => {
+                // PUTTING THIS NEW LIST IN PERMANENT STORAGE
+                // IS AN AFTER EFFECT
+                this.db.mutationDeleteList(this.state.listKeyPairMarkedForDeletion);
+                this.db.mutationUpdateSessionData(this.state.sessionData);
+            });
+        }
         this.hideDeleteListModal();
     }
     deleteList = (keyNamePair) => {
@@ -263,7 +280,7 @@ class App extends React.Component {
             listKeyPairMarkedForDeletion : keyNamePair,
             sessionData: this.state.sessionData
         }), () => {
-            // ANY AFTER EFFECTS?
+            // ANY AFTER EFFECTS? TODO?
         });
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
@@ -297,6 +314,7 @@ class App extends React.Component {
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
+                    currentList={this.state.currentList}
                     undoCallback={this.undo}
                     redoCallback={this.redo}
                     closeListCallback={this.closeCurrentList} />
